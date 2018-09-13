@@ -1,2 +1,0 @@
-# UnityEditorTool
-Editor Tools
