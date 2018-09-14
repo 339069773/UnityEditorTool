@@ -84,8 +84,8 @@ namespace Assets.Editor
                 Debug.LogError("Error    非正方形贴图:" + texturePath);
             }
 //            TextureImporter ti = (TextureImporter)TextureImporter.GetAtPath(AssetDatabase.GetAssetPath(t2D));
-            TextureImporter ti = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(t2D));
-            int origin = t2D.height;
+            var ti = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(t2D));
+            var origin = t2D.height;
             //原 512 以上的都压缩为 512
             if(origin > 512)
             {
