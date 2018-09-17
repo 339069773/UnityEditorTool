@@ -6,11 +6,23 @@ using UnityEditor;
 
 public class MyTools:Editor
 {
+#region 勾选开关按钮
+const string CheckMenu = "BearJTools/SetCheckMenu";
+    public static bool Flag = false;
+    [MenuItem(CheckMenu)]
+    public static void SetCheckMenu()
+    {
+        bool flag = Menu.GetChecked(CheckMenu);
+        Flag = !flag;
+        Menu.SetChecked(CheckMenu,Flag);
+    }
+
+#endregion
 
     /// <summary>
     /// Hierarchy 选择对象进行相关操作
     /// </summary>
-    [MenuItem(@"BearJTools/Debug Select GameObj Name(include child) _%#_W")]
+    [MenuItem(@"BearJTools/Select GameObj _%#_W")]
     public static void SetGameObjDepthReduce()
     {
         String name = "common_cefanyexuanzhong";
