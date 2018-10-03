@@ -12,6 +12,7 @@ const string CheckMenu = "BearJTools/SetCheckMenu";
     [MenuItem(CheckMenu)]
     public static void SetCheckMenu()
     {
+        Debug.Log("SetCheckMenu");
         bool flag = Menu.GetChecked(CheckMenu);
         Flag = !flag;
         Menu.SetChecked(CheckMenu,Flag);
@@ -84,6 +85,11 @@ const string CheckMenu = "BearJTools/SetCheckMenu";
     [MenuItem(@"BearJTools/CopyComponent _%#_C")]
     public static void CopyComponent()
     {
+        Debug.Log("CopyComponent");
+        if (Selection.activeGameObject==null)
+        {
+            return;
+        }
         _transform = Selection.activeGameObject.GetComponent<Transform>();
         _go = Selection.activeGameObject;
     }
@@ -94,6 +100,7 @@ const string CheckMenu = "BearJTools/SetCheckMenu";
     [MenuItem(@"BearJTools/PaseComponent _%#_V")]
     public static void PaseComponent()
     {
+        Debug.Log("PaseComponent");
         Transform[] transforms = Selection.GetTransforms(SelectionMode.Deep);
         for(int j = 0;j < transforms.Length;j++)
         {

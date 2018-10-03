@@ -18,7 +18,9 @@ namespace Assets.Editor
         public static string AssetsPathUpFolder = Application.dataPath+"/../";
 
         static readonly StringBuilder LogStringBuilder = new StringBuilder();
-        #region 通过名称后缀 搜索 Assets 下面的文件        [MenuItem(@"BearJ Find/Find By Way 1")]
+
+        #region 通过名称后缀 搜索 Assets 下面的文件
+        [MenuItem(@"BearJ Find/Find By Way 1")]
         public static void FindByWay1()
         {
             string fileName = AssetsPathUpFolder + "FindByWay1LogInfo.txt";
