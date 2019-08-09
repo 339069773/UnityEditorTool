@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -7,197 +6,141 @@ using UnityEngine;
 
 public class CopyFolderWithkeepRef : Editor
 {
-    [MenuItem("LazerSelect/Copy/TestFUn")]
-    static private void XXXXXX()
-    {
-        string oldFolderPath = AssetDatabase.GetAssetPath(Selection.objects[0]);
-        Debug.LogError("CopFilesWithDependency: " + oldFolderPath);
-        //string newGuid = Guid.NewGuid().ToString("N");
-        //Debug.LogError("CopFilesWithDependency: " + newGuid);
-
-        Dictionary<string, string> guidOldToNewMap = new Dictionary<string, string>();
-
-        string contents = File.ReadAllText(oldFolderPath+".meta");
-        string a = AssetDatabase.AssetPathToGUID(oldFolderPath);
-        Debug.LogError("CopFilesWithDependency: " + a);
-
-        string guid = "609ce22d767ae874b9d86a163dfa18bd";
-        string targetpath = AssetDatabase.GUIDToAssetPath(guid);
-        Debug.LogError("==targetpath=" + targetpath);
-
-        //IEnumerable<string> guids = GetGuids(contents);
-        //{
-        //    if (!contents.Contains(oldGuid))
-        //        continue;
-
-        //    string newGuid = guidOldToNewMap[oldGuid];
-        //    if (string.IsNullOrEmpty(newGuid))
-        //        throw new NullReferenceException("newGuid == null");
-
-        //    contents = contents.Replace("guid: " + oldGuid, "guid: " + n
-
-
-        //IEnumerable<string> guids = GetGuids(contents);
-        //bool isFirstGuid = true;
-        //foreach (string oldGuid in guids)
-        //{
-        //    // First GUID in .meta file is always the GUID of the asset itself  
-        //    if (isFirstGuid && Path.GetExtension(filePath) == ".meta")
-        //    {
-        //        ownGuids.Add(oldGuid);
-        //        isFirstGuid = false;
-        //    }
-        //    // Generate and save new GUID if we haven't added it before  
-        //    if (!guidOldToNewMap.ContainsKey(oldGuid))
-        //    {
-        //        string newGuid = Guid.NewGuid().ToString("N");
-        //        guidOldToNewMap.Add(oldGuid, newGuid);
-        //    }
-
-        //    if (!guidsInFileMap.ContainsKey(filePath))
-        //        guidsInFileMap[filePath] = new List<string>();
-
-        //    if (!guidsInFileMap[filePath].Contains(oldGuid))
-        //    {
-        //        guidsInFileMap[filePath].Add(oldGuid);
-        //    }
-        //}
-    }
-
-
-    [MenuItem("Assets/LazerSelect/Copy/复制文件夹(复制依赖关系)", false, 0)]
-    [MenuItem("LazerSelect/Copy/复制文件夹(复制依赖关系)")]
-    static private void CopFilesWithDependency()
-    {
-        string oldFolderPath = AssetDatabase.GetAssetPath(Selection.objects[0]);
-        string[] s = oldFolderPath.Split('/');
-        string folderName = s[s.Length - 1];
-        if (folderName.Contains("."))
-        {
-            Debug.LogError("该索引不是文件夹名字");
-            return;
-        }
-        string copyedFolderPath = Path.GetFullPath(".") + Path.DirectorySeparatorChar + oldFolderPath;
-        string newfolderName = "copy_" + folderName;
-        string tempFolderPath = Application.dataPath.Replace("Assets", "TempAssets") + "/" + oldFolderPath.Replace("Assets/", "").Replace(folderName, newfolderName);
-        string newFoldrPath = tempFolderPath.Replace("TempAssets", "Assets");
-
-        UtilFile.CopyDirectory(copyedFolderPath, tempFolderPath);
-        //重新生成guids
-        UtilGuids.RegenerateGuids(copyedFolderPath);
-        UtilFile.CopyDirectory(copyedFolderPath, newFoldrPath);
-        AssetDatabase.DeleteAsset(oldFolderPath);
-        UtilFile.CopyDirectory(tempFolderPath, copyedFolderPath);
-        AssetDatabase.Refresh();
-        AssetDatabase.SaveAssets();
-    }
-    public class UtilGuids
-    {
-        private static readonly string[] kDefaultFileExtensions = {  
+    private static readonly string[] InPrefabIgnoreReplaceGUID = {  
             // "*.meta",  
             // "*.mat",  
             // "*.anim",  
             // "*.prefab",  
             // "*.unity",  
             // "*.asset"  
-            "*.*"
+            ".cs",
+            ".dll",
         };
-        static public void RegenerateGuids(string _assetsPath, string[] regeneratedExtensions = null)
+    private static readonly string[] SomeFileToReplaceGUID = {  
+            ".prefab",
+        };
+
+    [MenuItem(@"BearJTools/Copy/Promotion&Banner")]
+    static private void CopyPromotion()
+    {
+        if (Selection.objects.Length <= 0)
         {
-            if (regeneratedExtensions == null)
-            {
-                regeneratedExtensions = kDefaultFileExtensions;
-            }
-
-            // Get list of working files  
-            List<string> filesPaths = new List<string>();
-            foreach (string extension in regeneratedExtensions)
-            {
-                filesPaths.AddRange(
-                    Directory.GetFiles(_assetsPath, extension, SearchOption.AllDirectories)
-                    );
-            }
-
-            // Create dictionary to hold old-to-new GUID map  
-            Dictionary<string, string> guidOldToNewMap = new Dictionary<string, string>();
-            Dictionary<string, List<string>> guidsInFileMap = new Dictionary<string, List<string>>();
-
-            // We must only replace GUIDs for Resources present in Assets.   
-            // Otherwise built-in resources (shader, meshes etc) get overwritten.  
-            HashSet<string> ownGuids = new HashSet<string>();
-
-            // Traverse all files, remember which GUIDs are in which files and generate new GUIDs  
-            int counter = 0;
-            foreach (string filePath in filesPaths)
-            {
-                EditorUtility.DisplayProgressBar("Scanning Assets folder", MakeRelativePath(_assetsPath, filePath), counter / (float)filesPaths.Count);
-                string contents = string.Empty;
-                try
-                {
-                    contents = File.ReadAllText(filePath);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(filePath);
-                    Debug.LogError(e.ToString());
-                    counter++;
-                    continue;
-                }
-                IEnumerable<string> guids = GetGuids(contents);
-                bool isFirstGuid = true;
-                foreach (string oldGuid in guids)
-                {
-                    // First GUID in .meta file is always the GUID of the asset itself  
-                    if (isFirstGuid && Path.GetExtension(filePath) == ".meta")
-                    {
-                        ownGuids.Add(oldGuid);
-                        isFirstGuid = false;
-                    }
-                    // Generate and save new GUID if we haven't added it before  
-                    if (!guidOldToNewMap.ContainsKey(oldGuid))
-                    {
-                        string newGuid = Guid.NewGuid().ToString("N");
-                        guidOldToNewMap.Add(oldGuid, newGuid);
-                    }
-
-                    if (!guidsInFileMap.ContainsKey(filePath))
-                        guidsInFileMap[filePath] = new List<string>();
-
-                    if (!guidsInFileMap[filePath].Contains(oldGuid))
-                    {
-                        guidsInFileMap[filePath].Add(oldGuid);
-                    }
-                }
-
-                counter++;
-            }
-
-            // Traverse the files again and replace the old GUIDs  
-            counter = -1;
-            int guidsInFileMapKeysCount = guidsInFileMap.Keys.Count;
-            foreach (string filePath in guidsInFileMap.Keys)
-            {
-                EditorUtility.DisplayProgressBar("Regenerating GUIDs", MakeRelativePath(_assetsPath, filePath), counter / (float)guidsInFileMapKeysCount);
-                counter++;
-
-                string contents = File.ReadAllText(filePath);
-                foreach (string oldGuid in guidsInFileMap[filePath])
-                {
-                    if (!ownGuids.Contains(oldGuid))
-                        continue;
-
-                    string newGuid = guidOldToNewMap[oldGuid];
-                    if (string.IsNullOrEmpty(newGuid))
-                        throw new NullReferenceException("newGuid == null");
-
-                    contents = contents.Replace("guid: " + oldGuid, "guid: " + newGuid);
-                }
-                File.WriteAllText(filePath, contents);
-            }
-
-            EditorUtility.ClearProgressBar();
+            Debug.LogError("Please Select Some Dic!!");
+            return;
         }
-        private static IEnumerable<string> GetGuids(string text)
+        string oldFolderPath = AssetDatabase.GetAssetPath(Selection.objects[0]);
+        var GUID_Map = GetGUIDMap(oldFolderPath);
+        string newFolderPath = oldFolderPath + "_Copy";
+        while (Directory.Exists(newFolderPath))
+        {
+            newFolderPath = newFolderPath + "_Copy";
+        }
+        UtilFile.CopyDirectory(oldFolderPath, newFolderPath);
+        SetNewGUID2Meta(GUID_Map, newFolderPath);
+        AssetDatabase.Refresh();
+        ReplaceOldGUIDRef(GUID_Map, newFolderPath);
+        AssetDatabase.Refresh();
+        AssetDatabase.SaveAssets();
+    }
+    static private void WritePrefab(string path,string content)
+    {
+        FileInfo fileInfo = new FileInfo(path);
+        var original = fileInfo.Attributes;
+        fileInfo.Attributes = FileAttributes.Normal;
+        File.WriteAllText(path, content);
+        fileInfo.Attributes = original;
+    }
+    static private bool IsReplaceFileType(string filePath) {
+
+        if (filePath.EndsWith(".prefab") || filePath.EndsWith(".asset")) {
+            return true;
+        }
+        return false;
+    }
+    static private void ReplaceOldGUIDRef(Dictionary<string, string> dic,string folder_path) {
+        string[] fileName = Directory.GetFiles(folder_path,"*",SearchOption.AllDirectories);
+        foreach (string filePath in fileName)
+        {
+            //Debug.Log(filePath);
+            FileInfo fileInfo = new FileInfo(filePath);
+            if (IsReplaceFileType(filePath))
+            {
+                string contents = File.ReadAllText(filePath);
+                //Debug.Log(contents);
+                IEnumerable<string> guids = UtilGuids.GetGuids(contents);
+                foreach (var item in guids)
+                {
+                    if (dic.ContainsKey(item))
+                    {
+                        contents = contents.Replace(item, dic[item]);
+                        Debug.Log(string.Format("=Success !=In {0}=\n old={1}\n new={2} ", fileInfo.Name, AssetDatabase.GUIDToAssetPath(item), AssetDatabase.GUIDToAssetPath(dic[item])));
+                    }
+                    else {
+                        Debug.LogWarning("=Replace Fail != No Key Match :" + UtilGuids.GetFildNameByGUID(item));
+                    }
+                }
+                WritePrefab(filePath, contents);
+            }
+        }
+    }
+    static private void SetNewGUID2Meta(Dictionary<string, string> dic,string folder_path)
+    {
+        Dictionary<string, string> ret = new Dictionary<string, string>();
+        string[] fileName = Directory.GetFiles(folder_path, "*.meta",SearchOption.AllDirectories);
+        foreach (string filePath in fileName)
+        {
+            string contents = File.ReadAllText(filePath);
+            IEnumerable<string> get_guild_in_prefab = UtilGuids.GetGuids(contents);
+            foreach (var item in get_guild_in_prefab)
+            {
+                if (dic.ContainsKey(item))
+                {
+                    contents = contents.Replace(item, dic[item]);
+                    WritePrefab(filePath, contents);
+                }
+            }
+        }
+    }
+    static private Dictionary<string, string> GetGUIDMap(string folder_path)
+    {
+        Dictionary<string, string> ret = new Dictionary<string, string>();
+        string[] fileName = Directory.GetFiles(folder_path,"*",SearchOption.AllDirectories);
+        foreach (string filePath in fileName)
+        {
+            string id = AssetDatabase.AssetPathToGUID(filePath);
+            if (!String.IsNullOrEmpty(id))
+            {
+                string newGuid = Guid.NewGuid().ToString("N");
+                if (!ret.ContainsKey(id))
+                {
+                    ret.Add(id, newGuid);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public class UtilGuids
+    {
+        static public string GetFildNameByGUID(string guid)
+        {
+            if (String.IsNullOrEmpty(guid))
+            {
+                return string.Empty;
+            }
+            var file_path = AssetDatabase.GUIDToAssetPath(guid);
+            try
+            {
+                FileInfo fileInfo = new FileInfo(file_path);
+                return fileInfo.Name;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+                throw;
+            }
+        }
+        public static IEnumerable<string> GetGuids(string text)
         {
             const string guidStart = "guid: ";
             const int guidLength = 32;
@@ -282,7 +225,7 @@ public class CopyFolderWithkeepRef : Editor
             {
                 //根据每个文件名称生成对应的目标文件名称
                 string filePathTemp = Path.Combine(destDirectory, filePath.Substring(sourceDirectory.Length + 1));// destDirectory + "\\" + filePath.Substring(sourceDirectory.Length + 1);
-                                                                                                                  //若不存在，直接复制文件；若存在，覆盖复制
+                //若不存在，直接复制文件；若存在，覆盖复制
                 if (File.Exists(filePathTemp))
                 {
                     File.Copy(filePath, filePathTemp, true);
