@@ -18,7 +18,8 @@ public class CopyFolderWithkeepRef : Editor
         };
     private static readonly string[] SomeFileToReplaceGUID = {  
             ".prefab",
-        };
+            ".asset",
+     };
 
     [MenuItem(@"BearJTools/Copy/Promotion&Banner")]
     static private void CopyPromotion()
@@ -37,7 +38,7 @@ public class CopyFolderWithkeepRef : Editor
         }
         UtilFile.CopyDirectory(oldFolderPath, newFolderPath);
         SetNewGUID2Meta(GUID_Map, newFolderPath);
-        AssetDatabase.Refresh();
+        //AssetDatabase.Refresh(); spine 材质球复制问题，新文件夹guid log问题
         ReplaceOldGUIDRef(GUID_Map, newFolderPath);
         AssetDatabase.Refresh();
         AssetDatabase.SaveAssets();
@@ -51,9 +52,12 @@ public class CopyFolderWithkeepRef : Editor
         fileInfo.Attributes = original;
     }
     static private bool IsReplaceFileType(string filePath) {
-
-        if (filePath.EndsWith(".prefab") || filePath.EndsWith(".asset")) {
-            return true;
+        for (int i = 0; i < SomeFileToReplaceGUID.Length; i++)
+        {
+            if (filePath.EndsWith(SomeFileToReplaceGUID[i]))
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -65,7 +69,7 @@ public class CopyFolderWithkeepRef : Editor
             FileInfo fileInfo = new FileInfo(filePath);
             if (IsReplaceFileType(filePath))
             {
-                string contents = File.ReadAllText(filePath);
+                string contents = File.ReadAllText(filePath); 
                 //Debug.Log(contents);
                 IEnumerable<string> guids = UtilGuids.GetGuids(contents);
                 foreach (var item in guids)
@@ -73,7 +77,7 @@ public class CopyFolderWithkeepRef : Editor
                     if (dic.ContainsKey(item))
                     {
                         contents = contents.Replace(item, dic[item]);
-                        Debug.Log(string.Format("=Success !=In {0}=\n old={1}\n new={2} ", fileInfo.Name, AssetDatabase.GUIDToAssetPath(item), AssetDatabase.GUIDToAssetPath(dic[item])));
+                        Debug.Log(string.Format("=Success !=In {0}=\n old={1}\n new={2} ", fileInfo.Name, AssetDatabase.GUIDToAssetPath(item), (dic[item])));
                     }
                     else {
                         Debug.LogWarning("=Replace Fail != No Key Match :" + UtilGuids.GetFildNameByGUID(item));
