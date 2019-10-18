@@ -5,6 +5,7 @@
 @set trunk_path=svn://192.168.0.50/dragonunity/trunk
 @set mege_range=14762-14763,14776-14777
 @set svn_version_split="-"
+@set svn_log=Merged revision(s) from trunk : %mege_range%
 :: ¥Ú”°
 @echo   ≈‰÷√–≈œ¢
 @echo ************************************************************************
@@ -65,6 +66,7 @@ for %%a in (%mege_range%) do (
 echo. ==================== Success!! ========
 echo. ==================== Success!! ========
 echo. ==================== Success!! ========
+echo %svn_log% | clip
 GOTO END
 
 :END
