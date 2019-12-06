@@ -1,9 +1,9 @@
 @echo off
 
 @set svn_bin=C:\Program Files\TortoiseSVN\bin
-@set svn_work=D:\WorkCopy\branch
+@set svn_work=D:\WorkCopy\branch2
 @set trunk_path=svn://192.168.0.50/dragonunity/trunk
-@set mege_range=14762-14763,14776-14777
+@set mege_range=18556-18560,18562-18565,18567-18569,18571-18580,18583,18585-18587,18589-18596,18598-18599,18604-18606,18608-18610,18612-18616,18618-18628,18633-18645,18647-18671,18674-18678,18680,18682-18683,18685,18690
 @set svn_version_split="-"
 @set svn_log=Merged revision(s) from trunk : %mege_range%
 :: 打印
@@ -51,14 +51,14 @@ for %%a in (%mege_range%) do (
 	rem 存在“-” 区间逐个合并
 		for /f "delims=-, tokens=1,2" %%i in ("%%a") do (
 			for /l %%b in (%%i,1,%%j) do (
-				rem echo %%a
+				rem echo %%b
 				call:TestMerge %%b
 				call:CheckTestMergeResult %%b
 			)
 		)
 	)||(
 		rem 单独版本
-		rem echo %%a
+		rem echo %%a *
 		call:TestMerge %%a
 		call:CheckTestMergeResult %%a
 	)
@@ -66,11 +66,11 @@ for %%a in (%mege_range%) do (
 echo. ==================== Success!! ========
 echo. ==================== Success!! ========
 echo. ==================== Success!! ========
+if exist MergeInfo.txt del MergeInfo.txt
+
 echo %svn_log% | clip
-GOTO END
 
 :END
-if exist MergeInfo.txt del MergeInfo.txt
 pause
 GOTO:EOF
 
