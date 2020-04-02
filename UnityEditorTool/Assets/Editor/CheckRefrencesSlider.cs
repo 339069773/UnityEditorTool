@@ -15,7 +15,7 @@ using UnityEngine;
         private static string _sliderType;
 
     public static string AssetsPathUpFolder = Application.dataPath + "/../";
-    static readonly StringBuilder LogStringBuilder = new StringBuilder();
+    //static readonly StringBuilder LogStringBuilder = new StringBuilder();
     private static void Init()
     {
         _strUiPerfabPath = "Assets/AAAMyTest/";
