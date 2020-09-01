@@ -21,7 +21,7 @@ public class CopyFolderWithkeepRef : Editor
             ".asset",
      };
 
-    [MenuItem(@"BearJTools/Copy/Promotion&Banner")]
+    [MenuItem(@"BearJTools/Copy With Ref")]
     static private void CopyPromotion()
     {
         if (Selection.objects.Length <= 0)

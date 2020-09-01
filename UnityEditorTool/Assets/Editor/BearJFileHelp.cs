@@ -72,12 +72,12 @@ public static void Copy() {
     /// 获取目录下所有文件名
     /// </summary>
     /// <param name="directory"></param>
-    public static List<string> GetFileNames(string path,string searchPattern, SearchOption option) {
+    public static string[] GetFileNames(string path,string searchPattern, SearchOption option) {
         if (!Directory.Exists(path))
         {
             return null;
         }
-        var ret = Directory.GetFiles(path,searchPattern, option)
+        var ret = Directory.GetFiles(path, searchPattern, option);
         return ret;
     }
 

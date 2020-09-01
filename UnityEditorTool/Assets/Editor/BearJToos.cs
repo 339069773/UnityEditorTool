@@ -22,11 +22,12 @@ public class BearJToos : Editor
         //    sw.WriteLine("what a win a!");
         //    sw.Close();
         //}
-        var a = BearJFileHelp.GetFileNames(file);
-        foreach (var item in a)
-        {
-            Debug.Log(item);
-        }
+
+        //var a = BearJFileHelp.GetFileNames(file);
+        //foreach (var item in a)
+        //{
+        //    Debug.Log(item);
+        //}
     }
 
 #if UNITY_2018_3_OR_NEWER
@@ -45,17 +46,7 @@ public class BearJToos : Editor
         return _prefab;
     }
 #endif
-    public static void CreatPrefab(string prefabPath)
-    {
-        if (!prefabPath.EndsWith(".prefab"))
-        {
-            EditorUtility.DisplayDialog("CreatPrefab Error !",
-                prefabPath + " Need  End With .prefab", "OK");
-            return;
-        }
-        //这样创建出来的Prefab图标是白色的，不能拖到场景中，连Transform组件也没有
-        PrefabUtility.CreateEmptyPrefab(prefabPath);
-    }
+
 
     void DisplayProgressBarDemo(){
         EditorUtility.DisplayProgressBar("Title","info a/b",0.2f);
